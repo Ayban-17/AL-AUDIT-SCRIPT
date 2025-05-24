@@ -387,7 +387,7 @@ function isTrueDestination(path, pattern) {
 }
 
 // Helper function to extract links from a specific element
-function extractLinksFromElement(element) {
+function extractLinksFromElement(element, sectionType = null) {
   const links = [];
   const anchorElements = element.querySelectorAll('a[href]');
   
@@ -447,13 +447,34 @@ function extractLinksFromElement(element) {
     
     // Determine URL pattern
     const urlPattern = determineUrlPattern(href);
-    
+
+    // Check for description based on section type
+    let hasDescription = false;
+    if (sectionType) {
+      const sectionTypeLower = sectionType.toLowerCase();
+      let descriptionSelector = '';
+      
+      if (['four', 'sumtiles', 'articles'].includes(sectionTypeLower)) {
+        descriptionSelector = '.al-lnk-details';
+      } else if (sectionTypeLower === 'table') {
+        descriptionSelector = '.al-lp-table-summary';
+      }
+      
+      if (descriptionSelector) {
+        const descriptionElement = anchor.querySelector(descriptionSelector);
+        if (descriptionElement && descriptionElement.textContent.trim().length > 0) {
+          hasDescription = true;
+        }
+      }
+    }
+
     // Add the link to our results
     links.push({
       text: text,
       href: href,
       urlPattern: urlPattern,
-      isExternal: href.startsWith('http') && !href.includes(window.location.hostname)
+      isExternal: href.startsWith('http') && !href.includes(window.location.hostname),
+      hasDescription: hasDescription
     });
   });
   
